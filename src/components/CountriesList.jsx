@@ -31,22 +31,9 @@ const CountriesList = ({ query }) => {
   if (filteredCountries.length === 0) {
     return (
       <div className='mt-16 px-16 flex gap-6 flex-wrap justify-between items-center'>
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
-        <CountryCardShimmer />;
+        {Array.from({ length: 20 }).map((_el, i) => {
+          return <CountryCardShimmer key={i} />;
+        })}
       </div>
     );
   }
@@ -63,6 +50,7 @@ const CountriesList = ({ query }) => {
             capital={country?.capital}
             flagSrc={country?.flags?.svg}
             alt={country?.flags?.alt}
+            data={country}
           />
         );
       })}

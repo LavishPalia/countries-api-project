@@ -1,10 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const CountryCard = ({ name, population, region, capital, flagSrc, alt }) => {
+const CountryCard = ({
+  name,
+  population,
+  region,
+  capital,
+  flagSrc,
+  alt,
+  data,
+}) => {
   return (
     <Link
       to={`/${name}`}
+      state={data}
       className='flex flex-col shadow-md space-y-4 rounded-lg w-72 bg-[#F5FEFD] hover:scale-105 delay-100'
     >
       <img

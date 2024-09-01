@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import CountryDetailShimmer from './shimmer/CountryDetailShimmer';
 
 const CountryDetail = () => {
   const [countryData, setCountryData] = useState(null);
   const [error, setError] = useState(null);
   const params = useParams();
+  const location = useLocation();
+
+  console.log(location.state);
 
   const country = params.country;
 
@@ -14,6 +17,40 @@ const CountryDetail = () => {
 
     setCountryData(null);
     setError(null);
+
+    const updateStateData = async (data) => {
+      const promiseArray = data.borders?.map(async (border) => {
+        const borderCountriesResponse = await fetch(
+          `https://restcountries.com/v3.1/alpha/${border}`
+        );
+
+        const [borderCountryData] = await borderCountriesResponse.json();
+        return borderCountryData.name.common;
+      });
+
+      const borders = await Promise.all(promiseArray || []);
+
+      setCountryData({
+        flag: data.flags.svg,
+        name: data.name.common,
+        nativeName: Object.values(data.name.nativeName)[0].common,
+        population: data.population,
+        region: data.region,
+        subregion: data.subregion,
+        capital: data.capital.join(', '),
+        language: Object.values(data.languages).join(', '),
+        tld: data.tld,
+        currencies: Object.values(data.currencies)
+          .map((currency) => currency.name)
+          .join(', '),
+        borders: borders || [],
+      });
+    };
+
+    if (location.state) {
+      updateStateData(location.state);
+      return;
+    }
 
     const fetchCountryData = async () => {
       try {
@@ -29,33 +66,8 @@ const CountryDetail = () => {
 
         const [data] = await response.json();
 
-        const promiseArray = data.borders?.map(async (border) => {
-          const borderCountriesResponse = await fetch(
-            `https://restcountries.com/v3.1/alpha/${border}`
-          );
-
-          const [borderCountryData] = await borderCountriesResponse.json();
-          return borderCountryData.name.common;
-        });
-
-        const borders = await Promise.all(promiseArray || []);
-
         if (mounted) {
-          setCountryData({
-            flag: data.flags.svg,
-            name: data.name.common,
-            nativeName: Object.values(data.name.nativeName)[0].common,
-            population: data.population,
-            region: data.region,
-            subregion: data.subregion,
-            capital: data.capital.join(', '),
-            language: Object.values(data.languages).join(', '),
-            tld: data.tld,
-            currencies: Object.values(data.currencies)
-              .map((currency) => currency.name)
-              .join(', '),
-            borders: borders || [],
-          });
+          updateStateData(data);
         }
       } catch (error) {
         if (mounted) {
@@ -167,7 +179,7 @@ const CountryDetail = () => {
             {/* borders */}
             {countryData.borders.length !== 0 && (
               <div className='flex gap-2 flex-wrap items-center font-semibold mt-2'>
-                <p className='text-xl'>Borders: </p>
+                <p className='text-xl'>Border Countries: </p>
                 {countryData.borders.map((border, i) => (
                   <Link to={`/${border}`} key={border}>
                     <p
